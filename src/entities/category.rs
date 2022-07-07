@@ -24,10 +24,13 @@ impl Category {
     pub fn find_all() -> Vec<Category> {
         let directories = fs::read_dir(base_dir()).unwrap();
 
-        directories
+        let mut categories = directories
             .into_iter()
             .map(|d| d.unwrap().into())
-            .collect::<Vec<Category>>()
+            .collect::<Vec<Category>>();
+        categories.sort_by(|a, b| a.name.cmp(&b.name));
+
+        categories
     }
 
     fn find_picture_filename(dir_name: &str) -> Option<String> {

@@ -38,30 +38,10 @@ fn category(slug: String) -> Result<content::RawHtml<String>, status::NotFound<O
     })).unwrap()))
 }
 
-#[get("/<category_slug>/<video_slug>")]
-fn video(
-    category_slug: String,
-    video_slug: String,
-) -> Result<content::RawHtml<String>, status::NotFound<Option<&'static str>>> {
-    let category = match Category::find_single(category_slug) {
-        Ok(cat) => cat,
-        Err(_) => return Err(status::NotFound(None)),
-    };
-
-    let video = match Video::find_single(video_slug, &category) {
-        Ok(vid) => vid,
-        Err(_) => return Err(status::NotFound(None)),
-    };
-
-    Ok(content::RawHtml(Handlebars::new().render_template(templates::video(), &json!({
-        "video": video
-    })).unwrap()))
-}
-
 #[launch]
 fn rocket() -> _ {
     rocket::build()
-        .mount("/", routes![index, category, video])
+        .mount("/", routes![index, category])
         .mount("/c", FileServer::from(relative!("/static")))
         .mount("/d", FileServer::from(base_dir()))
 }

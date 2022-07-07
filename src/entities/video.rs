@@ -1,4 +1,3 @@
-use crate::errors::Error;
 use crate::helpers::base_dir::base_dir;
 use crate::Category;
 use serde::Serialize;
@@ -17,25 +16,19 @@ pub struct Video {
 }
 
 impl Video {
-    pub fn find_single(slug: String, category: &Category) -> Result<Video, crate::errors::Error> {
-        match Video::find_all(category)
-            .into_iter()
-            .find(|v| v.slug == slug)
-        {
-            Some(v) => Ok(v),
-            None => Err(Error::VideoNotFound),
-        }
-    }
-
     pub fn find_all(category: &Category) -> Vec<Video> {
         let files = fs::read_dir(format!("{}/{}", base_dir(), &category.name)).unwrap();
 
-        files
+        let mut videos = files
             .into_iter()
             .map(|d| d.unwrap())
             .filter(Video::is_video_file)
             .map(|d| Video::from_dir_entry(d, category))
-            .collect::<Vec<Video>>()
+            .collect::<Vec<Video>>();
+
+        videos.sort_by(|a, b| a.name.cmp(&b.name));
+
+        videos
     }
 
     fn find_picture_filename(filename: &str, category: &Category) -> Option<String> {
